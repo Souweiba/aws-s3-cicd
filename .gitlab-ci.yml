@@ -1,0 +1,33 @@
+variables:
+  VITE_APP_VERSION: $CI_COMMIT_SHORT_SHA
+
+stages:
+  - build
+  - test
+  - deploy
+
+build_image:
+  image: node:22-alpine
+  stage: build
+  script:
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - build/
+
+test_image:
+  image: node:22-alpine
+  stage: test
+  script:
+    - npm ci
+    - npm test
+
+deploy_image:
+  image:
+    name: amazon/aws-cli:2.23.0
+    entrypoint: [""]
+  stage: deploy
+  script:
+    - echo "Deploying to AWS S3" > index.html
+    - aws s3 sync build/ s3://$AWS_BUCKET/
